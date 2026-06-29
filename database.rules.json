@@ -1,9 +1,10 @@
 {
   "rules": {
-    ".read": true,
-    ".write": true,
-    "tasks": {
-      ".indexOn": ["order"]
+    "boards": {
+      "$board": {
+        ".read": true,
+        ".write": true
+      }
     }
   }
 }

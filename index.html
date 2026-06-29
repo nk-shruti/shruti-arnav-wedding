@@ -285,7 +285,9 @@ const SEED = [
 let TASKS = {};                 // id -> task
 let META  = {name1:'Arnav', name2:'Shruti', weddingDate:'2026-09-20'};
 let db = null, mode = 'local';
-const LS_TASKS='wed_tasks_v5', LS_META='wed_meta_v5';
+const LS_TASKS='wed_tasks_v5', LS_META='wed_meta_v5', LS_BOARD='wed_board_key';
+let BOARD = localStorage.getItem(LS_BOARD) || '';          // secret board key (kept only in your browser)
+function boardRef(p){ return db.ref('boards/'+BOARD+'/'+p); }
 
 function uid(){ return 'k'+Math.abs(Math.floor((performance.now()*1000)%1e9)).toString(36)+(Object.keys(TASKS).length); }
 
@@ -297,8 +299,8 @@ function initSync(){
       firebase.initializeApp(firebaseConfig);
       db = firebase.database();
       mode='live';
-      db.ref('tasks').on('value', s=>{ TASKS = s.val()||{}; maybeSeed(); render(); });
-      db.ref('meta').on('value',  s=>{ if(s.val()) META = Object.assign(META,s.val()); applyMeta(); });
+      boardRef('tasks').on('value', s=>{ TASKS = s.val()||{}; maybeSeed(); render(); });
+      boardRef('meta').on('value',  s=>{ if(s.val()) META = Object.assign(META,s.val()); applyMeta(); });
       setBadge('live','Live sync — shared');
       return;
     }catch(e){ console.warn('Firebase init failed, using local mode',e); }
@@ -318,7 +320,7 @@ function maybeSeed(){
     const id='seed'+(i++);
     TASKS[id]={id,title,category:cat,status,who:who||'Unassigned',due:due||'',notes:notes||'',order:now+i};
   });
-  if(mode==='live'){ db.ref('tasks').set(TASKS); } else { persistLocal(); }
+  if(mode==='live'){ boardRef('tasks').set(TASKS); } else { persistLocal(); }
 }
 
 function persistLocal(){
@@ -327,14 +329,14 @@ function persistLocal(){
 }
 function saveTask(t){
   TASKS[t.id]=t;
-  if(mode==='live') db.ref('tasks/'+t.id).set(t); else { persistLocal(); render(); }
+  if(mode==='live') boardRef('tasks/'+t.id).set(t); else { persistLocal(); render(); }
 }
 function removeTask(id){
   delete TASKS[id];
-  if(mode==='live') db.ref('tasks/'+id).remove(); else { persistLocal(); render(); }
+  if(mode==='live') boardRef('tasks/'+id).remove(); else { persistLocal(); render(); }
 }
 function saveMeta(){
-  if(mode==='live') db.ref('meta').set(META); else { persistLocal(); }
+  if(mode==='live') boardRef('meta').set(META); else { persistLocal(); }
 }
 function setBadge(cls,text){
   const b=document.getElementById('syncBadge');
@@ -541,7 +543,7 @@ document.getElementById('importFile').onchange=e=>{
       if(d.tasks){
         if(!confirm('Import will REPLACE the current tasks with the ones in this file. Continue?')) return;
         TASKS=d.tasks; if(d.meta) META=Object.assign(META,d.meta);
-        if(mode==='live'){ db.ref('tasks').set(TASKS); db.ref('meta').set(META); }
+        if(mode==='live'){ boardRef('tasks').set(TASKS); boardRef('meta').set(META); }
         else { persistLocal(); }
         applyMeta(); render();
         alert('Imported '+Object.keys(TASKS).length+' tasks.');
@@ -552,7 +554,37 @@ document.getElementById('importFile').onchange=e=>{
 };
 
 /* ============================ Go ============================ */
-initSync();
+/* ---- Passphrase gate: only people who know the shared key see the board ---- */
+function showGate(){
+  const o=document.createElement('div'); o.className='overlay show'; o.id='gate';
+  o.innerHTML=
+    '<div class="modal" style="max-width:430px">'+
+    '<h3>Enter your shared passphrase</h3>'+
+    '<p style="font-size:13px;color:var(--muted);margin:-6px 0 14px">Ask your partner for the wedding-board passphrase. It keeps your list private — it is never stored in the site\'s code, only in your browser.</p>'+
+    '<div class="field"><input id="gateInput" placeholder="passphrase" autocomplete="off" autocapitalize="off" spellcheck="false"></div>'+
+    '<div class="modal-actions"><button class="btn primary" id="gateGo">Open our board →</button></div>'+
+    '</div>';
+  document.body.appendChild(o);
+  const go=()=>{
+    const v=(document.getElementById('gateInput').value||'').trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+    if(!v) return;
+    BOARD=v; localStorage.setItem(LS_BOARD,BOARD); o.remove(); initSync();
+  };
+  document.getElementById('gateGo').onclick=go;
+  document.getElementById('gateInput').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+  setTimeout(()=>document.getElementById('gateInput').focus(),60);
+}
+// click the sync badge to switch board / re-enter the passphrase
+document.getElementById('syncBadge').addEventListener('click',()=>{
+  if(confirm('Switch board or re-enter the passphrase? You will need the shared passphrase again.')){
+    localStorage.removeItem(LS_BOARD); location.reload();
+  }
+});
+document.getElementById('syncBadge').style.cursor='pointer';
+document.getElementById('syncBadge').title='Click to switch board / re-enter passphrase';
+
+/* start: live mode needs the passphrase; local mode just runs */
+if(firebaseConfig && firebaseConfig.databaseURL && !BOARD){ showGate(); } else { initSync(); }
 </script>
 </body>
 </html>
