@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Our Wedding To-Do</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --blush:#f7ede9; --blush2:#f2dfd8; --sage:#8a9a7b; --sage-dk:#6f7e62;
+    --cream:#fffaf6; --ink:#43342e; --muted:#9c8a82; --gold:#c2a26b;
+    --card:#ffffff; --line:#ecdfd8; --shadow:0 6px 22px rgba(120,85,70,.10);
+    --todo:#c98a7a; --doing:#c2a26b; --done:#8a9a7b; --ideas:#9a8aa6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:'Nunito',system-ui,sans-serif;color:var(--ink);
+    background:linear-gradient(160deg,var(--blush) 0%,var(--cream) 45%,#fdf6f0 100%);
+    background-attachment:fixed;-webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif}
+
+  /* ---------- Header ---------- */
+  header{
+    text-align:center;padding:26px 18px 14px;position:relative;
+  }
+  .names{
+    font-size:clamp(30px,5vw,46px);font-weight:600;letter-spacing:.5px;
+    margin:0;line-height:1.05;
+  }
+  .names .amp{color:var(--gold);font-style:italic;padding:0 .15em}
+  .names span[contenteditable]{outline:none;border-bottom:1px dashed transparent;padding:0 2px}
+  .names span[contenteditable]:hover,.names span[contenteditable]:focus{border-bottom-color:var(--gold)}
+  .subtitle{color:var(--muted);font-size:14px;margin-top:2px;letter-spacing:2px;text-transform:uppercase}
+
+  .countdown{
+    margin:14px auto 4px;display:inline-flex;gap:14px;align-items:flex-end;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:12px 22px;box-shadow:var(--shadow);
+  }
+  .cd-num{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;line-height:1;color:var(--sage-dk)}
+  .cd-lbl{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+  .cd-block{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:48px}
+  .cd-date{display:block;margin-top:8px;font-size:13px;color:var(--muted)}
+  .cd-date input{font-family:inherit;border:1px solid var(--line);border-radius:8px;padding:3px 8px;color:var(--ink);background:var(--cream)}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    max-width:1240px;margin:10px auto 4px;padding:0 16px;
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;
+  }
+  .btn{
+    font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);
+    padding:9px 16px;border-radius:11px;transition:.15s;box-shadow:var(--shadow)
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn.primary{background:var(--sage);color:#fff;border-color:var(--sage)}
+  .btn.primary:hover{background:var(--sage-dk)}
+  select,.chipsel{
+    font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);
+    border:1px solid var(--line);background:var(--card);border-radius:11px;
+    padding:9px 12px;box-shadow:var(--shadow);cursor:pointer
+  }
+  .progress-wrap{flex-basis:100%;max-width:520px;margin:6px auto 0}
+  .progress-track{height:9px;background:var(--blush2);border-radius:99px;overflow:hidden}
+  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--sage),var(--gold));transition:width .4s}
+  .progress-label{text-align:center;font-size:12px;color:var(--muted);margin-top:5px}
+
+  /* ---------- Board ---------- */
+  .board{
+    max-width:1240px;margin:16px auto 60px;padding:0 14px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start;
+  }
+  @media(max-width:980px){.board{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:620px){.board{grid-template-columns:1fr}}
+  .col{
+    background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:18px;
+    padding:12px 12px 16px;min-height:120px;backdrop-filter:blur(4px);
+    display:flex;flex-direction:column;gap:10px;transition:.15s
+  }
+  .col.drag-over{background:var(--blush2);border-color:var(--gold);border-style:dashed}
+  .col-head{display:flex;align-items:center;gap:8px;padding:2px 4px}
+  .col-dot{width:10px;height:10px;border-radius:50%}
+  .col-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600}
+  .col-count{margin-left:auto;font-size:12px;font-weight:700;color:var(--muted);background:var(--cream);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:12px;padding:11px 12px;box-shadow:0 2px 8px rgba(120,85,70,.07);
+    cursor:grab;position:relative;transition:.12s
+  }
+  .card:hover{box-shadow:0 6px 16px rgba(120,85,70,.14);transform:translateY(-1px)}
+  .card.dragging{opacity:.45;cursor:grabbing}
+  .card-title{font-weight:700;font-size:14.5px;line-height:1.3;padding-right:18px}
+  .card.done .card-title{text-decoration:line-through;color:var(--muted)}
+  .card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+  .tag{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff}
+  .pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);background:var(--cream)}
+  .pill.due-soon{color:#b5563f;border-color:#e9c3b8;background:#fbeee9}
+  .pill.overdue{color:#fff;background:#c0594a;border-color:#c0594a}
+  .pill.who{color:var(--sage-dk);border-color:#d6e0cb;background:#eef2e8}
+  .card-del{position:absolute;top:7px;right:8px;border:none;background:none;color:var(--muted);
+    cursor:pointer;font-size:15px;line-height:1;opacity:0;transition:.15s;padding:2px}
+  .card:hover .card-del{opacity:1}
+  .card-del:hover{color:#c0594a}
+  .add-card{
+    border:1px dashed var(--line);background:transparent;color:var(--muted);
+    font-family:inherit;font-weight:700;font-size:13px;border-radius:11px;padding:9px;
+    cursor:pointer;transition:.15s
+  }
+  .add-card:hover{border-color:var(--sage);color:var(--sage-dk);background:rgba(255,255,255,.5)}
+
+  /* ---------- Modal ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(67,52,46,.42);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
+  .overlay.show{display:flex}
+  .modal{background:var(--cream);border-radius:20px;box-shadow:0 20px 60px rgba(67,52,46,.3);
+    width:100%;max-width:440px;padding:22px;border:1px solid var(--line)}
+  .modal h3{margin:0 0 14px;font-size:26px;font-weight:600}
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px}
+  .field input,.field textarea,.field select{
+    width:100%;font-family:inherit;font-size:14px;color:var(--ink);
+    border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;resize:vertical
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--sage)}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
+  /* ---------- Sync badge ---------- */
+  .sync{
+    position:fixed;right:14px;bottom:14px;display:flex;align-items:center;gap:8px;
+    background:var(--card);border:1px solid var(--line);border-radius:99px;
+    padding:7px 14px;font-size:12px;font-weight:700;box-shadow:var(--shadow);z-index:40
+  }
+  .sync .dot{width:9px;height:9px;border-radius:50%;background:#bbb}
+  .sync.live .dot{background:#5fa86a;box-shadow:0 0 0 4px rgba(95,168,106,.18)}
+  .sync.local .dot{background:var(--gold)}
+  .footer-note{text-align:center;color:var(--muted);font-size:12px;padding:0 0 80px}
+</style>
+</head>
+<body>
+<header>
+  <h1 class="names">
+    <span contenteditable="true" data-meta="name1">Arnav</span>
+    <span class="amp">&amp;</span>
+    <span contenteditable="true" data-meta="name2">Shruti</span>
+  </h1>
+  <div class="subtitle">Legacy Stables · Winston-Salem · Sep 19–20, 2026</div>
+
+  <div class="countdown" id="countdown">
+    <div class="cd-block"><span class="cd-num" id="cd-days">—</span><span class="cd-lbl">Days</span></div>
+    <div class="cd-block"><span class="cd-num" id="cd-weeks">—</span><span class="cd-lbl">Weeks</span></div>
+    <div class="cd-block"><span class="cd-num" id="cd-months">—</span><span class="cd-lbl">Months</span></div>
+  </div>
+  <span class="cd-date">The big day: <input type="date" id="weddingDate" /></span>
+</header>
+
+<div class="toolbar">
+  <button class="btn primary" id="addBtn">＋ Add task</button>
+  <select id="filterCat"><option value="">All categories</option></select>
+  <select id="filterWho">
+    <option value="">Everyone</option>
+    <option value="__name1__">Arnav</option>
+    <option value="__name2__">Shruti</option>
+    <option value="Both">Both of us</option>
+    <option value="Unassigned">Unassigned</option>
+  </select>
+  <button class="btn" id="exportBtn" title="Download a backup / the base seed">⬇ Export</button>
+  <button class="btn" id="importBtn" title="Load tasks from a backup file">⬆ Import</button>
+  <input type="file" id="importFile" accept="application/json" style="display:none" />
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+    <div class="progress-label" id="progLabel">0 of 0 done</div>
+  </div>
+</div>
+
+<main class="board" id="board"></main>
+
+<p class="footer-note">Tip: drag cards between columns • click a card to edit • everything saves automatically</p>
+
+<!-- Edit / add modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add task</h3>
+    <input type="hidden" id="editId" />
+    <div class="field"><label>Task</label><input id="fTitle" placeholder="e.g. Book the photographer" /></div>
+    <div class="field"><label>Category</label><select id="fCat"></select></div>
+    <div class="field"><label>Status</label><select id="fStatus"></select></div>
+    <div class="field"><label>Who's on it</label><select id="fWho"></select></div>
+    <div class="field"><label>Due date</label><input type="date" id="fDue" /></div>
+    <div class="field"><label>Notes</label><textarea id="fNotes" rows="2" placeholder="Links, contacts, reminders…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn" id="cancelBtn">Cancel</button>
+      <button class="btn primary" id="saveBtn">Save task</button>
+    </div>
+  </div>
+</div>
+
+<div class="sync local" id="syncBadge"><span class="dot"></span><span id="syncText">Local mode</span></div>
+
+<!-- Firebase (loads only if config below is filled in) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+/* ============================================================================
+   1) FIREBASE CONFIG  —  paste your config object between the braces below.
+      Until you do, the app runs in LOCAL mode (saves to this browser only).
+      Step-by-step instructions are in README.md.
+   ========================================================================== */
+const firebaseConfig = {
+  // apiKey: "…",
+  // authDomain: "…",
+  // databaseURL: "https://YOUR-PROJECT-default-rtdb.firebaseio.com",
+  // projectId: "…",
+  // storageBucket: "…",
+  // messagingSenderId: "…",
+  // appId: "…"
+};
+/* ========================================================================== */
+
+const COLUMNS = [
+  {key:'ideas', title:'Ideas',       color:'var(--ideas)'},
+  {key:'todo',  title:'To Do',       color:'var(--todo)'},
+  {key:'doing', title:'In Progress', color:'var(--doing)'},
+  {key:'done',  title:'Done',        color:'var(--done)'},
+];
+const CATEGORIES = [
+  {name:'Planning',     color:'#9a8aa6'},
+  {name:'Budget',       color:'#5fa86a'},
+  {name:'Venue',        color:'#c98a7a'},
+  {name:'Catering',     color:'#c2a26b'},
+  {name:'Photo/Video',  color:'#6f93b8'},
+  {name:'Attire',       color:'#cf8fb0'},
+  {name:'Flowers/Decor',color:'#8a9a7b'},
+  {name:'Music/Ent.',   color:'#b08968'},
+  {name:'Guests/Invites',color:'#7a9eb8'},
+  {name:'Ceremony',     color:'#b07d9a'},
+  {name:'Beauty',       color:'#d99fa6'},
+  {name:'Honeymoon',    color:'#5fa1a8'},
+  {name:'Legal/Admin',  color:'#8c8c8c'},
+  {name:'Bach Trips',   color:'#e0915e'},
+  {name:'Misc',         color:'#a8957f'},
+];
+const catColor = n => (CATEGORIES.find(c=>c.name===n)||{}).color || 'var(--gold)';
+
+/* ---- Tasks: cleared — ready for Shruti & Arnav's real list ----
+   Weekend @ Legacy Stables, Winston-Salem, NC:
+     Sat Sep 19, 4–11 PM  · Baraat → Sangeet → dinner, drinks, after-party
+     Sun Sep 20, 8:30 AM–4 PM · Wedding ceremony → lunch
+   Format: [title, category, status, who, dueDate]                              */
+const SEED = [
+  ["Finalize DJ & dhol — decide, cost out, sign contract","Music/Ent.","doing","Unassigned","","Isabel offered two DJs: DJ Cash vs DJ Kirtan (new, suggested this morning). Leaning Kirtan but he's pricier — work out the cost/logistics, decide, and sign the contract."],
+  ["Sunday live-stream / AV setup","Photo/Video","todo","Unassigned","","Find an AV person for Sunday. Set up 2–3 cameras (Ring-style) around the venue, streamed to a laptop, with someone switching the live feed so guests watching from India can follow."],
+  ["Confirm violinist details (Sunday)","Music/Ent.","todo","Unassigned","","Violinist 'Odisha' (spelling TBC), Sunday. Make sure she brings enough speakers for ~200 + mics, and can play requested music when not on violin (acts as day-of DJ)."],
+  ["⭐ Reserve winery — Chateau Ste. Michelle, 20 ppl","Bach Trips","todo","Unassigned","2026-07-08","Joint reservation for 20 (both groups), Sun Jul 12 afternoon, Woodinville WA. Important."],
+  ["Book 2 cars for the girls' group","Bach Trips","todo","__name2__","2026-07-08","Message Pratishta → car #1. Message Nikita → car #2."],
+  ["⭐ Bachelorette tote bags ×9 (HIGH PRIORITY)","Bach Trips","doing","__name2__","2026-07-04","For 9 people. Each tote: custom bag + little goodies + printed picture/memory + personal letter + ONE individualized gift per person (unique to them). Needs a per-person plan — start early; orders take time."],
+  ["Plan the 3-day bach itinerary with Priyanka","Bach Trips","todo","Unassigned","2026-07-07","Work with Priyanka to build the 3-day plan (Fri–Sun, Jul 10–12) and keep on schedule."],
+  ["Review floral quote — $19K, over budget","Flowers/Decor","doing","Unassigned","","Isabel's quote = $19,000, over budget. (1) Analyze with AI for overcharges. (2) Send to both sets of parents to review. (3) Get a third-party opinion."],
+  ["Sign off concept guide → parents rundown","Flowers/Decor","todo","Unassigned","","Isabel updated some elements (lounge 'sofas', TBC). 1) Shruti reviews & signs off. 2) Set up a parents rundown (concept guide + florals + décor). May combine with the florals parents review."],
+  ["⭐ Finish hand-drawn invitation (parents' friends)","Guests/Invites","doing","__name2__","","Custom hand-drawn invite, separate from the main invites (already sent). ~25% done; needs a couple iterations + cleanup. ~3–4 hrs of focused work."],
+  ["⭐ Rank gold necklaces & send to Mom","Attire","todo","__name2__","","Mom sent a few gold necklace options. Rank them and send back so she can buy the top pick. High pressure — gold is expensive, be sure."],
+  ["Send Isabel availability for venue + catering walkthrough","Venue","todo","Unassigned","2026-07-05","NC trip ~Jul 18/19–22/23. Another venue tour with catering + Isabel to plan where the food stalls & open live-stations go, within Legacy Stables' rules. Attendees: Guru (catering owner), Isabel (planner), Caitlyn (Legacy contact). Isabel schedules it — your action: figure out when you're free and send her the details."],
+  ["⭐ Choose makeup artist(s) — awaiting quotes","Beauty","doing","__name2__","","For Shruti + the people around her (family/bridal party). Isabel sent 9 options (Jun 18); shortlisted (Jun 24); Isabel inquired with all shortlisted. Awaiting availability + pricing. Top picks: @atlantamakeupartist_, @hairby_nataliya, @jennylemua, @makeupbypallak. Also like: @makeupsolutionsbynila, @limonimua_. Next: compare quotes → pick → book."],
+];
+
+/* ============================ State & storage ============================ */
+let TASKS = {};                 // id -> task
+let META  = {name1:'Arnav', name2:'Shruti', weddingDate:'2026-09-20'};
+let db = null, mode = 'local';
+const LS_TASKS='wed_tasks_v4', LS_META='wed_meta_v4';
+
+function uid(){ return 'k'+Math.abs(Math.floor((performance.now()*1000)%1e9)).toString(36)+(Object.keys(TASKS).length); }
+
+/* try to start Firebase if config looks filled in */
+function initSync(){
+  const ok = firebaseConfig && firebaseConfig.databaseURL;
+  if(ok){
+    try{
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      mode='live';
+      db.ref('tasks').on('value', s=>{ TASKS = s.val()||{}; maybeSeed(); render(); });
+      db.ref('meta').on('value',  s=>{ if(s.val()) META = Object.assign(META,s.val()); applyMeta(); });
+      setBadge('live','Live sync — shared');
+      return;
+    }catch(e){ console.warn('Firebase init failed, using local mode',e); }
+  }
+  // local fallback
+  mode='local';
+  TASKS = JSON.parse(localStorage.getItem(LS_TASKS)||'null') || {};
+  META  = Object.assign(META, JSON.parse(localStorage.getItem(LS_META)||'null') || {});
+  maybeSeed(); applyMeta(); render();
+  setBadge('local','Local mode — this device only');
+}
+
+function maybeSeed(){
+  if(Object.keys(TASKS).length>0) return;
+  const now=Date.now(); let i=0;
+  SEED.forEach(([title,cat,status,who,due,notes])=>{
+    const id='seed'+(i++);
+    TASKS[id]={id,title,category:cat,status,who:who||'Unassigned',due:due||'',notes:notes||'',order:now+i};
+  });
+  if(mode==='live'){ db.ref('tasks').set(TASKS); } else { persistLocal(); }
+}
+
+function persistLocal(){
+  localStorage.setItem(LS_TASKS, JSON.stringify(TASKS));
+  localStorage.setItem(LS_META, JSON.stringify(META));
+}
+function saveTask(t){
+  TASKS[t.id]=t;
+  if(mode==='live') db.ref('tasks/'+t.id).set(t); else { persistLocal(); render(); }
+}
+function removeTask(id){
+  delete TASKS[id];
+  if(mode==='live') db.ref('tasks/'+id).remove(); else { persistLocal(); render(); }
+}
+function saveMeta(){
+  if(mode==='live') db.ref('meta').set(META); else { persistLocal(); }
+}
+function setBadge(cls,text){
+  const b=document.getElementById('syncBadge');
+  b.className='sync '+cls; document.getElementById('syncText').textContent=text;
+}
+
+/* ============================ Rendering ============================ */
+const board=document.getElementById('board');
+let filterCat='', filterWho='';
+
+function whoLabel(v){
+  if(v==='__name1__'||v===META.name1) return META.name1;
+  if(v==='__name2__'||v===META.name2) return META.name2;
+  return v;
+}
+function dueInfo(due){
+  if(!due) return null;
+  const d=new Date(due+'T00:00:00'); const today=new Date(); today.setHours(0,0,0,0);
+  const diff=Math.round((d-today)/86400000);
+  let cls='', txt=d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  if(diff<0){cls='overdue';txt='Overdue · '+txt;}
+  else if(diff<=14){cls='due-soon';txt='Due '+txt;}
+  return {cls,txt};
+}
+
+function render(){
+  // filter
+  const list=Object.values(TASKS).filter(t=>{
+    if(filterCat && t.category!==filterCat) return false;
+    if(filterWho){
+      const w=t.who||'Unassigned';
+      const want = filterWho==='__name1__'?META.name1 : filterWho==='__name2__'?META.name2 : filterWho;
+      if(filterWho==='__name1__' && !(w===META.name1||w==='__name1__')) return false;
+      else if(filterWho==='__name2__' && !(w===META.name2||w==='__name2__')) return false;
+      else if(filterWho!=='__name1__'&&filterWho!=='__name2__' && w!==want) return false;
+    }
+    return true;
+  });
+
+  board.innerHTML='';
+  COLUMNS.forEach(col=>{
+    const items=list.filter(t=>(t.status||'todo')===col.key).sort((a,b)=>(a.order||0)-(b.order||0));
+    const el=document.createElement('section');
+    el.className='col'; el.dataset.col=col.key;
+    el.innerHTML=`<div class="col-head">
+        <span class="col-dot" style="background:${col.color}"></span>
+        <span class="col-title">${col.title}</span>
+        <span class="col-count">${items.length}</span>
+      </div>`;
+    items.forEach(t=>el.appendChild(cardEl(t)));
+    const add=document.createElement('button');
+    add.className='add-card'; add.textContent='＋ Add';
+    add.onclick=()=>openModal(null,col.key);
+    el.appendChild(add);
+
+    // drag targets
+    el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over')});
+    el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
+    el.addEventListener('drop',e=>{
+      e.preventDefault();el.classList.remove('drag-over');
+      const id=e.dataTransfer.getData('text/plain'); const t=TASKS[id];
+      if(t && t.status!==col.key){ t.status=col.key; t.order=Date.now(); saveTask(t); render(); }
+    });
+    board.appendChild(el);
+  });
+  updateProgress();
+}
+
+function cardEl(t){
+  const c=document.createElement('div');
+  c.className='card'+(t.status==='done'?' done':'');
+  c.style.borderLeftColor=catColor(t.category);
+  c.draggable=true;
+  const di=dueInfo(t.due);
+  const who=(t.who&&t.who!=='Unassigned')?`<span class="pill who">${whoLabel(t.who)}</span>`:'';
+  c.innerHTML=`
+    <button class="card-del" title="Delete">✕</button>
+    <div class="card-title">${escapeHtml(t.title)}</div>
+    <div class="card-meta">
+      <span class="tag" style="background:${catColor(t.category)}">${t.category||'Misc'}</span>
+      ${di?`<span class="pill ${di.cls}">${di.txt}</span>`:''}
+      ${who}
+    </div>`;
+  c.querySelector('.card-del').onclick=(e)=>{e.stopPropagation(); if(confirm('Delete this task?')) removeTask(t.id);};
+  c.onclick=()=>openModal(t.id);
+  c.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',t.id);c.classList.add('dragging')});
+  c.addEventListener('dragend',()=>c.classList.remove('dragging'));
+  return c;
+}
+
+function updateProgress(){
+  const all=Object.values(TASKS), done=all.filter(t=>t.status==='done').length;
+  const pct=all.length?Math.round(done/all.length*100):0;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progLabel').textContent=`${done} of ${all.length} done · ${pct}%`;
+}
+
+function escapeHtml(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ============================ Modal ============================ */
+const overlay=document.getElementById('overlay');
+function fillSelect(sel,opts){sel.innerHTML=opts.map(o=>`<option value="${o.v}">${o.t}</option>`).join('');}
+function whoOptions(){return [
+  {v:'Unassigned',t:'Unassigned'},
+  {v:'__name1__',t:META.name1},
+  {v:'__name2__',t:META.name2},
+  {v:'Both',t:'Both of us'},
+];}
+function openModal(id,presetStatus){
+  document.getElementById('editId').value=id||'';
+  document.getElementById('modalTitle').textContent=id?'Edit task':'Add task';
+  fillSelect(document.getElementById('fCat'),CATEGORIES.map(c=>({v:c.name,t:c.name})));
+  fillSelect(document.getElementById('fStatus'),COLUMNS.map(c=>({v:c.key,t:c.title})));
+  fillSelect(document.getElementById('fWho'),whoOptions());
+  const t=id?TASKS[id]:null;
+  document.getElementById('fTitle').value=t?t.title:'';
+  document.getElementById('fCat').value=t?t.category:'Planning';
+  document.getElementById('fStatus').value=t?t.status:(presetStatus||'todo');
+  document.getElementById('fWho').value=t?(t.who||'Unassigned'):'Unassigned';
+  document.getElementById('fDue').value=t?(t.due||''):'';
+  document.getElementById('fNotes').value=t?(t.notes||''):'';
+  overlay.classList.add('show');
+  setTimeout(()=>document.getElementById('fTitle').focus(),50);
+}
+function closeModal(){overlay.classList.remove('show');}
+document.getElementById('addBtn').onclick=()=>openModal(null);
+document.getElementById('cancelBtn').onclick=closeModal;
+overlay.onclick=e=>{if(e.target===overlay)closeModal();};
+document.getElementById('saveBtn').onclick=()=>{
+  const title=document.getElementById('fTitle').value.trim();
+  if(!title){document.getElementById('fTitle').focus();return;}
+  const id=document.getElementById('editId').value || uid();
+  const old=TASKS[id]||{};
+  saveTask({
+    id, title,
+    category:document.getElementById('fCat').value,
+    status:document.getElementById('fStatus').value,
+    who:document.getElementById('fWho').value,
+    due:document.getElementById('fDue').value,
+    notes:document.getElementById('fNotes').value.trim(),
+    order:old.order||Date.now(),
+  });
+  if(mode==='live') render();
+  closeModal();
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ============================ Meta (names, date, countdown) ============================ */
+function applyMeta(){
+  document.querySelectorAll('[data-meta]').forEach(el=>{
+    const k=el.dataset.meta; if(META[k]!=null && el.textContent!==META[k]) el.textContent=META[k];
+  });
+  document.getElementById('weddingDate').value=META.weddingDate||'';
+  // refresh filter labels
+  document.querySelector('#filterWho option[value="__name1__"]').textContent=META.name1;
+  document.querySelector('#filterWho option[value="__name2__"]').textContent=META.name2;
+  updateCountdown();
+}
+document.querySelectorAll('[data-meta]').forEach(el=>{
+  el.addEventListener('blur',()=>{
+    META[el.dataset.meta]=el.textContent.trim()||el.dataset.meta;
+    saveMeta(); applyMeta(); render();
+  });
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el.blur();}});
+});
+document.getElementById('weddingDate').addEventListener('change',e=>{
+  META.weddingDate=e.target.value; saveMeta(); updateCountdown();
+});
+function updateCountdown(){
+  const d=META.weddingDate?new Date(META.weddingDate+'T00:00:00'):null;
+  const D=document.getElementById('cd-days'),W=document.getElementById('cd-weeks'),M=document.getElementById('cd-months');
+  if(!d||isNaN(d)){D.textContent=W.textContent=M.textContent='—';return;}
+  const today=new Date();today.setHours(0,0,0,0);
+  const days=Math.max(0,Math.round((d-today)/86400000));
+  D.textContent=days; W.textContent=Math.floor(days/7); M.textContent=(days/30.44).toFixed(1);
+}
+
+/* ============================ Filters ============================ */
+const fc=document.getElementById('filterCat');
+fc.innerHTML='<option value="">All categories</option>'+CATEGORIES.map(c=>`<option>${c.name}</option>`).join('');
+fc.onchange=e=>{filterCat=e.target.value;render();};
+document.getElementById('filterWho').onchange=e=>{filterWho=e.target.value;render();};
+
+/* ============================ Export / Import ============================ */
+document.getElementById('exportBtn').onclick=()=>{
+  const data={meta:META, tasks:TASKS, exportedFrom:'wedding-todo'};
+  // 1) download a JSON backup
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='wedding-tasks-backup.json'; a.click(); URL.revokeObjectURL(a.href);
+  // 2) also print a ready-to-bake SEED block to the console (for Claude)
+  const seed=Object.values(TASKS).sort((a,b)=>(a.order||0)-(b.order||0))
+    .map(t=>`  [${JSON.stringify(t.title)},${JSON.stringify(t.category)},${JSON.stringify(t.status)},${JSON.stringify(t.who||'Unassigned')},${JSON.stringify(t.due||'')}],`).join('\n');
+  console.log('--- SEED block (copy everything between the lines) ---\nconst SEED = [\n'+seed+'\n];\n--- end SEED ---');
+  alert('Saved wedding-tasks-backup.json to your Downloads.\n\n(A ready-to-bake list was also printed to the browser console — open DevTools if Claude asks for it.)');
+};
+document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(d.tasks){
+        if(!confirm('Import will REPLACE the current tasks with the ones in this file. Continue?')) return;
+        TASKS=d.tasks; if(d.meta) META=Object.assign(META,d.meta);
+        if(mode==='live'){ db.ref('tasks').set(TASKS); db.ref('meta').set(META); }
+        else { persistLocal(); }
+        applyMeta(); render();
+        alert('Imported '+Object.keys(TASKS).length+' tasks.');
+      } else alert('That file doesn\'t look like a wedding-tasks backup.');
+    }catch(err){ alert('Could not read that file: '+err.message); }
+  };
+  r.readAsText(f); e.target.value='';
+};
+
+/* ============================ Go ============================ */
+initSync();
+</script>
+</body>
+</html>
