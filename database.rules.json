@@ -2,8 +2,8 @@
   "rules": {
     "boards": {
       "$board": {
-        ".read": true,
-        ".write": true
+        ".read":  "$board !== 'b-510d238a1054cb2f6d4e'",
+        ".write": "$board !== 'b-510d238a1054cb2f6d4e'"
       }
     }
   }
