@@ -254,26 +254,38 @@ const catColor = n => (CATEGORIES.find(c=>c.name===n)||{}).color || 'var(--gold)
      Sun Sep 20, 8:30 AM–4 PM · Wedding ceremony → lunch
    Format: [title, category, status, who, dueDate]                              */
 const SEED = [
-  ["Finalize DJ & dhol — decide, cost out, sign contract","Music/Ent.","doing","Unassigned","","Isabel offered two DJs: DJ Cash vs DJ Kirtan (new, suggested this morning). Leaning Kirtan but he's pricier — work out the cost/logistics, decide, and sign the contract."],
+  ["Finalize DJ & dhol — decide, cost out, sign contract","Music/Ent.","doing","Unassigned","","Isabel offered two DJs: DJ Kash vs DJ Kirtan (new, suggested this morning). Leaning Kirtan but he's pricier — work out the cost/logistics, decide, and sign the contract."],
   ["Sunday live-stream / AV setup","Photo/Video","todo","Unassigned","","Find an AV person for Sunday. Set up 2–3 cameras (Ring-style) around the venue, streamed to a laptop, with someone switching the live feed so guests watching from India can follow."],
-  ["Confirm violinist details (Sunday)","Music/Ent.","todo","Unassigned","","Violinist 'Odisha' (spelling TBC), Sunday. Make sure she brings enough speakers for ~200 + mics, and can play requested music when not on violin (acts as day-of DJ)."],
+  ["Confirm violinist details (Sunday)","Music/Ent.","todo","Unassigned","","Violinist Udeshi, Sunday. Make sure she brings enough speakers for ~200 + mics, and can play requested music when not on violin (acts as day-of DJ)."],
   ["⭐ Reserve winery — Chateau Ste. Michelle, 20 ppl","Bach Trips","todo","Unassigned","2026-07-08","Joint reservation for 20 (both groups), Sun Jul 12 afternoon, Woodinville WA. Important."],
   ["Book 2 cars for the girls' group","Bach Trips","todo","__name2__","2026-07-08","Message Pratishta → car #1. Message Nikita → car #2."],
   ["⭐ Bachelorette tote bags ×9 (HIGH PRIORITY)","Bach Trips","doing","__name2__","2026-07-04","For 9 people. Each tote: custom bag + little goodies + printed picture/memory + personal letter + ONE individualized gift per person (unique to them). Needs a per-person plan — start early; orders take time."],
   ["Plan the 3-day bach itinerary with Priyanka","Bach Trips","todo","Unassigned","2026-07-07","Work with Priyanka to build the 3-day plan (Fri–Sun, Jul 10–12) and keep on schedule."],
   ["Review floral quote — $19K, over budget","Flowers/Decor","doing","Unassigned","","Isabel's quote = $19,000, over budget. (1) Analyze with AI for overcharges. (2) Send to both sets of parents to review. (3) Get a third-party opinion."],
-  ["Sign off concept guide → parents rundown","Flowers/Decor","todo","Unassigned","","Isabel updated some elements (lounge 'sofas', TBC). 1) Shruti reviews & signs off. 2) Set up a parents rundown (concept guide + florals + décor). May combine with the florals parents review."],
+  ["Sign off concept guide → parents rundown","Flowers/Decor","todo","Unassigned","","Isabel updated some elements (lounge 'sofas', TBC). 1) Shruti reviews & signs off. 2) Set up a parents rundown (concept guide + florals + décor). May combine with the florals parents review. Dads expect a detailed décor update next week."],
   ["⭐ Finish hand-drawn invitation (parents' friends)","Guests/Invites","doing","__name2__","","Custom hand-drawn invite, separate from the main invites (already sent). ~25% done; needs a couple iterations + cleanup. ~3–4 hrs of focused work."],
   ["⭐ Rank gold necklaces & send to Mom","Attire","todo","__name2__","","Mom sent a few gold necklace options. Rank them and send back so she can buy the top pick. High pressure — gold is expensive, be sure."],
-  ["Send Isabel availability for venue + catering walkthrough","Venue","todo","Unassigned","2026-07-05","NC trip ~Jul 18/19–22/23. Another venue tour with catering + Isabel to plan where the food stalls & open live-stations go, within Legacy Stables' rules. Attendees: Guru (catering owner), Isabel (planner), Caitlyn (Legacy contact). Isabel schedules it — your action: figure out when you're free and send her the details."],
+  ["Send Isabel availability for venue + catering walkthrough","Venue","todo","Unassigned","2026-07-05","NC trip Jul 18–22. Another venue tour with catering + Isabel to plan where the food stalls & open live-stations go, within Legacy Stables' rules. Attendees: Guru (catering owner), Isabel (planner), Caitlyn (Legacy contact). Isabel schedules it — your action: figure out when you're free and send her the details."],
   ["⭐ Choose makeup artist(s) — awaiting quotes","Beauty","doing","__name2__","","For Shruti + the people around her (family/bridal party). Isabel sent 9 options (Jun 18); shortlisted (Jun 24); Isabel inquired with all shortlisted. Awaiting availability + pricing. Top picks: @atlantamakeupartist_, @hairby_nataliya, @jennylemua, @makeupbypallak. Also like: @makeupsolutionsbynila, @limonimua_. Next: compare quotes → pick → book."],
+
+  // ---- Added from the dads' updates (Appa + Bhanu Uncle), Jun 24–26 ----
+  ["Wedding lunch: round-table buffet (not banana leaf)","Catering","done","Unassigned","","Decided with the dads: skip banana leaf (logistically complicated) — go round-table buffet style for the Sunday wedding lunch."],
+  ["Review the final menu list with the families","Catering","todo","Unassigned","","Most menu items finalized; the latest list is in the shared folder. Everyone to go through it again together."],
+  ["⭐ Send Appa the event-manager invitation draft","Guests/Invites","todo","__name2__","2026-07-03","Appa asked (6/26) for the draft invitation prepared by the event manager — send it; he'll make changes and return it next week. Flagged a 'key activity to focus'. NOTE: this is the main/printed invitation draft — separate from your hand-drawn invite for parents' friends."],
+  ["Finalize accommodation details (discuss w/ dads)","Guests/Invites","todo","Unassigned","","Accommodation is a topic the dads want to discuss next week. Pull together the details (the hotel for Sat & Sun nights you two are organizing) for the call."],
+  ["Schedule another call with the Pandit","Ceremony","todo","Unassigned","","Dads: need one more call with the Pandit (priest) to finalize ceremony details."],
+  ["Plan return gifts","Misc","todo","Unassigned","","Touch base with the dads next week on return gifts for guests."],
+  ["Confirm transport plan for close relatives","Misc","todo","Unassigned","","Assumption to confirm with the dads: close relatives arrange their own transport. Discuss & confirm."],
+  ["Plan timing + snacks/dinner for the 17th","Planning","todo","Unassigned","","Dads asked for the timing and snacks/dinner plan for Sep 17 (pre-wedding day). Put together a schedule."],
+  ["⭐ Decide outfit colors → tell parents & siblings","Attire","todo","__name2__","","Bhanu uncle: parents & siblings are waiting to know what colors to wear. Sequence: Shruti picks her palette → Arnav picks his → then communicate the colors to both sets of parents & siblings. They haven't bought yet (parents did a first round of saree buying at Kanchipuram), so they're blocked on this."],
+  ["Sumangali Prarthanai (India) — Jul 12 telecast","Ceremony","ideas","Unassigned","2026-07-12","Parents are hosting Sumangali Prarthanai in India on Jul 12; telecast link to follow. NOTE: same day as the bachelorette winery finale (Jul 12) — plan to catch the telecast."],
 ];
 
 /* ============================ State & storage ============================ */
 let TASKS = {};                 // id -> task
 let META  = {name1:'Arnav', name2:'Shruti', weddingDate:'2026-09-20'};
 let db = null, mode = 'local';
-const LS_TASKS='wed_tasks_v4', LS_META='wed_meta_v4';
+const LS_TASKS='wed_tasks_v5', LS_META='wed_meta_v5';
 
 function uid(){ return 'k'+Math.abs(Math.floor((performance.now()*1000)%1e9)).toString(36)+(Object.keys(TASKS).length); }
 
